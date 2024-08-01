@@ -10,12 +10,12 @@ from statsmodels.stats.weightstats import DescrStatsW
 
 #Source data, comment out any that you dont want to process.
 src = [
-        'PointClouds/Cm11bSD04.csv'
+        'PointClouds/Cm7SD06.csv'
        ]
 dec = -9.3 #Magnetic declination
 exportToCSV = True
-csvName = 'Exports/csv/LC_Cm11b-1.csv'
-pltitle = "Laurel Caverns - Cm11b-1"
+csvName = 'Exports/csv/LC_Cm7-1.csv'
+pltitle = "Laurel Caverns - Cm7-1"
 #Empty arrays
 strike = []
 dip = []
@@ -57,7 +57,9 @@ for clouds in src:
     #get cloud data
     for x in range(3,len(rawdata)):
         cloudData.append(rawdata[x])
-    
+    xC=[]
+    yC=[]
+    zC=[]
     #for each shot, 
     for shot in cloudData:
         
@@ -68,7 +70,9 @@ for clouds in src:
         
         #Add the point and origin cordinates to fix point to the global datum
         point = np.add(delta,cloudOrigin)
-        
+        xC.append(point[0])
+        yC.append(point[1])
+        zC.append(point[2])
         #Add point to the cloud cluster.
         cloudCoords.append(point)
     
@@ -119,14 +123,14 @@ for clouds in src:
             dip.append(np.abs(delta-180))
             
             upsilon = upsilon+90
-            if upsilon >360:
+            if upsilon >=360:
                 upsilon = upsilon-360
             upsilon = np.abs(upsilon-180)
             strike.append(upsilon)
         else:
             dip.append(delta)
             upsilon = upsilon+90
-            if upsilon >360:
+            if upsilon >=360:
                 upsilon = upsilon-360
             strike.append(upsilon)
             
@@ -147,6 +151,9 @@ dipModeIndex = ndip.argmax()
 #Plotting
 print("OUTPUT")
 print("------------------")
+print("Location       X: ", np.mean(xC))
+print("               Y: ", np.mean(yC))
+print("               Z: ", np.mean(zC))
 print("Number of Shots:  ", len(cloudCoords))
 print("Number of planes: ", len(dip))
 print("Mode Dip:         ", str((binsdip[dipModeIndex] + binsdip[dipModeIndex+1])/2))
@@ -169,6 +176,8 @@ if exportToCSV:
         
         spamwriter.writerow(['SHOTS'])
         spamwriter.writerow([src])
+        spamwriter.writerow(['LOC'])
+        spamwriter.writerow([np.mean(xC),np.mean(yC), np.mean(zC)])
         spamwriter.writerow(['STRIKE','DIP','AREA'])
         i = 0
         for strk in strike:
